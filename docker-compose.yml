@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build:
+      context: ./docker/python
+    container_name: "fastapi"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/srv
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --ws websockets --reload
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: "ngrok"
+    restart: unless-stopped
+    depends_on:
+      - fastapi
+      - grafana
+    command:
+      - "start"
+      - "--config=/etc/ngrok.yml"
+      - "fastapi"
+      - "grafana"
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+    ports:
+      - "4040:4040"
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      
+networks:
+  app_network:
+
+volumes:
+  grafana_data:

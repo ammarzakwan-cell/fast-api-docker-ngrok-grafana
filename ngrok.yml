@@ -1,0 +1,12 @@
+version: "2"
+
+authtoken: your-token
+
+tunnels:
+  fastapi:
+    proto: http
+    addr: fastapi:8000
+
+  grafana:
+    proto: http
+    addr: grafana:3000
