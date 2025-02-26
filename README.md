@@ -87,6 +87,8 @@ docker-compose up -d
 - **Create Dashboard** with panels:
   - **CPU Usage**:  
     ```promql
+    rate(process_cpu_seconds_total{job="fastapi"}[1m])
+    or
     100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
     ```
   - **WebSocket Requests**:
