@@ -16,50 +16,76 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
-
+        
         .chat-container {
             width: 100%;
             max-width: 500px;
+            height: 80vh;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
         }
-
+        
         #messages {
             list-style-type: none;
             padding: 0;
-            max-height: 300px;
+            flex-grow: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Space between messages */
         }
-
+        
         #messages li {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 5px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
             word-wrap: break-word;
         }
-
+        
         .message-user {
             background: #6bb5a2;
             color: white;
-            text-align: right;
+            align-self: flex-end; /* Align user messages to the right */
         }
-
+        
         .message-other {
             background: #e9ecef;
             color: black;
-            text-align: left;
+            align-self: flex-start; /* Align other messages to the left */
         }
-
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
         input {
-            width: 100%;
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-
+        
         button {
-            width: 100%;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -70,9 +96,9 @@
         
         <ul id="messages" class="list-group"></ul>
 
-        <div class="input-group mt-3">
-            <input id="messageInput" type="text" class="form-control mb-2" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
-            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        <div class="input-container">
+            <input id="messageInput" type="text" class="form-control" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button class="btn btn-primary" type="button" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
@@ -93,25 +119,49 @@
         ws.onmessage = (event) => {
             let messages = document.getElementById("messages");
             let message = document.createElement("li");
-    
-            let messageText = event.data;
-            let sender = messageText.split(": ")[0]; // Extract sender name
-            let content = messageText.substring(sender.length + 2); // Extract actual message
-    
-            let isUser = sender === username; // Check if message is from this user
-            message.className = "list-group-item " + (isUser ? "message-user" : "message-other");
-            message.textContent = isUser ? content : messageText; // Show only message if it's from the user
-    
+        
+            let messageText = event.data; // Get the plain text message
+            let separatorIndex = messageText.indexOf(":"); // Find the separator between sender and message
+        
+            if (separatorIndex === -1) {
+                // If there's no separator, treat the entire message as content
+                message.className = "message-other";
+                message.textContent = messageText;
+            } else {
+                // Extract sender and message content
+                let sender = messageText.substring(0, separatorIndex).trim();
+                let content = messageText.substring(separatorIndex + 1).trim();
+        
+                // Check if the message is from the current user
+                let isUser = sender === username;
+                message.className = isUser ? "message-user" : "message-other";
+                // Hide sender name for the user's own messages
+                if (isUser) {
+                    message.textContent = content; // Only show the message content
+                } else {
+                    message.textContent = `${sender}: ${content}`; // Show sender name and message content
+                }
+            }
+        
             messages.appendChild(message);
-            messages.scrollTop = messages.scrollHeight; // Auto-scroll to latest message
+            messages.scrollTop = messages.scrollHeight; // Auto-scroll to the latest message
+        };
+    
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+    
+        ws.onclose = () => {
+            console.log("WebSocket connection closed");
         };
     
         function sendMessage() {
             let input = document.getElementById("messageInput");
-            if (input.value.trim() !== "") {
-                let messageData = JSON.stringify({ name: username, message: input.value });
+            let message = input.value.trim();
+            if (message !== "") {
+                let messageData = JSON.stringify({ name: username, message: message });
                 ws.send(messageData);
-                input.value = "";
+                input.value = ""; // Clear input field
             }
         }
     
@@ -121,7 +171,5 @@
             }
         }
     </script>
-    
-
 </body>
 </html>
