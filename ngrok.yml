@@ -1,4 +1,4 @@
-version: "2"
+version: 2
 
 authtoken: your-token
 
@@ -6,6 +6,7 @@ tunnels:
   fastapi:
     proto: http
     addr: fastapi:8000
+    domain: sweet-honestly-griffon.ngrok-free.app
 
   grafana:
     proto: http
