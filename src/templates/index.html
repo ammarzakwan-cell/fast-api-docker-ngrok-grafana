@@ -114,7 +114,7 @@
             sessionStorage.setItem("chatUsername", username);
         }
     
-        let ws = new WebSocket(`wss://86ba-183-171-224-58.ngrok-free.app/ws?token=valid_token&name=${encodeURIComponent(username)}`);
+        let ws = new WebSocket(`wss://sweet-honestly-griffon.ngrok-free.app/ws?token=valid_token&name=${encodeURIComponent(username)}`);
     
         ws.onmessage = (event) => {
             let messages = document.getElementById("messages");
