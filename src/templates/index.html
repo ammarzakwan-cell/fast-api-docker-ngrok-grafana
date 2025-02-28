@@ -21,8 +21,8 @@
         
         .chat-container {
             width: 100%;
-            max-width: 500px;
-            height: 80vh;
+            max-width: 1000px;
+            height: 100vh;
             background: white;
             padding: 20px;
             border-radius: 10px;
@@ -31,6 +31,13 @@
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
+        }
+
+        /* Apply 80vh height for mobile screens */
+        @media screen and (max-width: 768px) {
+            .chat-container {
+                height: 80vh;
+            }
         }
         
         #messages {
@@ -93,6 +100,7 @@
 
     <div class="chat-container">
         <h2 class="text-center">👋 Chat</h2>
+        <p class="text-center">Sedap diguna pada chrome, sapari epal ade problem, developer malas nak fix</p>
         
         <ul id="messages" class="list-group"></ul>
 
